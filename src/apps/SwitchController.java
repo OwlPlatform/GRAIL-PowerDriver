@@ -1,4 +1,4 @@
-package silas;
+package apps;
 /*
 
  * GRAIL Real Time Localization System
@@ -27,8 +27,16 @@ import org.grailrtls.libworldmodel.types.DataConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
- * Class that can be used by applications to easily control power switches in the world model.
+ * 
+ * SwitchController.java
+ * 
+ * purpose: Class that can be used by applications to easily control power switches in the real model.
+ * @author Silas Waltzer, 
+ * @version 1.0 8/8/2012
+ * 
+ * 
  */
+
 public class SwitchController {
 	/**
 	 * Logger for this class.
@@ -47,23 +55,21 @@ public class SwitchController {
 		}
 	/** Updates an attribute with given data.
 	 * 
-	 * @param URI
-	 * @param attribute
-	 * @param data
+	 * @param URI uri to update
+	 * @param attribute attribute in the uri to update
+	 * @param data data value to insert
+	 * @return boolean indicating  successful
+	 * 
 	 */
-	public void update(final String URI, final String attribute,
-			boolean data) {
-		if (URI != null && attribute != null) {
-			this.updateAttribute(URI, attribute, data);
-		} else{
-			log.error("Invalid arguments to update attribute: null arguments");
-		}
-	}
-/** Updates an attribute with a boolean.
- * 
- */
-	private boolean updateAttribute(final String uri, final String attribute,
+
+	public boolean update(final String uri, final String attribute,
 			boolean inputData) {
+		
+	if (uri = null && attribute = null) {
+	{
+		log.error("Invalid arguments to update attribute: null arguments");
+		return false;
+	}
 
 		if (!DataConverter.hasConverterForURI(attribute)) {
 			log.error("Does not have converter for Datatype");

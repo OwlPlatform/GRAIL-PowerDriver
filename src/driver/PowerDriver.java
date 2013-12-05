@@ -1,6 +1,8 @@
-package silas;
+package driver;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+
 import org.grailrtls.libworldmodel.client.ClientWorldConnection;
 import org.grailrtls.libworldmodel.client.StepResponse;
 import org.grailrtls.libworldmodel.client.Response;
@@ -27,7 +29,16 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
-
+/**
+ * PowerDriver.java
+ * 
+ * purpose: Interact with the World Model winlab.powerSwitch objects to match their on status to 
+ *  the real world objects they stand for
+ *  
+ *  @aurthor Silas Waltzer, Sai Kotikalapudi
+ *  @version 1.0 8/8/2012 
+ * 
+ */
 public class PowerDriver {
 	/**
 	 * Logger for this class.
@@ -64,6 +75,11 @@ public class PowerDriver {
 			printUsageInfo();
 			return;
 		}
+		HashMap<String, Integer> outletmap = new HashMap<String, Integer>();
+		HashMap<String, String> targetmap = new HashMap<String, String>();
+		HashMap<String, String> usernamemap = new HashMap<String, String>();
+		HashMap<String, String> passwordmap = new HashMap<String, String>();
+		
 		// Create a connection to the World Model as a client
 		final ClientWorldConnection wmc = new ClientWorldConnection();
 		log.info("Connecting to {}", wmc);
@@ -127,24 +143,28 @@ public class PowerDriver {
 								outletTS = att.getCreationDate();
 								outlet = IntegerConverter.CONVERTER.decode(att.getData());
 								log.debug("Decoded outlet: {}",outlet);
+								outletmap.put(uri, outlet);
 							}
 						} else if ("target".equals(att.getAttributeName())) {
 							if (att.getCreationDate() > targetTS) {
 								targetTS = att.getCreationDate();
 								target = StringConverter.CONVERTER.decode(att.getData());
 								log.debug("Decoded target: {}",target);
+								targetmap.put(uri,  target);
 							}
 						} else if ("username".equals(att.getAttributeName())) {
 							if (att.getCreationDate() > usernameTS) {
 								usernameTS = att.getCreationDate();
 								username = StringConverter.CONVERTER.decode(att.getData());
 								log.debug("Decoded username: {}",username);
+								usernamemap.put(uri, username);
 							}
 						} else if ("password".equals(att.getAttributeName())) {
 							if (att.getCreationDate() > passwordTS) {
 								passwordTS = att.getCreationDate();
 								password = StringConverter.CONVERTER.decode(att.getData());
 								log.debug("Decoded password: {}",password);
+								passwordmap.put(uri, password);
 							}
 						}
 					} catch (Exception e) {
@@ -153,6 +173,19 @@ public class PowerDriver {
 					}
 				}
 				log.info("{} is {}", uri, newOnStatus ? "on" : "off");
+				if(outlet==-1){
+					outlet = outletmap.get(uri);
+				}
+				if(null==target){
+					target = targetmap.get(uri);
+				}
+				if(null==username){
+					username = usernamemap.get(uri);
+				}
+				if(null==password){
+					password = passwordmap.get(uri);
+				}
+				
 				WebPowerSwitchIII(target, outlet, newOnStatus, username, password);
 			}
 		}
@@ -168,6 +201,11 @@ public class PowerDriver {
 	/** Method that makes an HTTP request to the power switch, logging the
 	 * response.
 	 * 
+	 * @param target URL of the PowerSwitch
+	 * @param outletnum outlet num on the strip, goes from 0 to 7
+	 * @param on Switch status of the object.
+	 * @param username username to connect to url
+	 * @param password password to connect to url
 	 * 
 	*/ 
 	private static void WebPowerSwitchIII(String target, int outletnum,
